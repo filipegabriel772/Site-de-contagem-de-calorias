@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Refeições</title>
+</head>
+<body>
+    <div>
+        <p>Olá, {{ user.username }}</p>
+    </div>
+    <a href="{% url 'adicionar_ia' %}">Adicionar Refeição</a>
+    <a href="{% url 'definir_metas' %}">Definir metas</a>
+    <h1>Refeições cadastradas</h1>
+    <ul>
+        {% for item in alimentos %}
+        <li>
+            <strong>{{item.descricao}}</strong> - {{item.calorias}} Kcal
+            (Proteínas: {{item.proteinas}} g)
+        </li>
+        {% empty %}
+        <li>Nenhuma refeição encontrada</li>
+        {% endfor %}
+    </ul>
+
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Sair</button>
+    </form>
+
+
+</body>
+</html>

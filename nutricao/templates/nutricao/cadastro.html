@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de usuários</title>
+</head>
+<body>
+    <h1>Crie sua conta</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ formulario.as_p }}
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <br>
+    <a href="/">Voltar para a página inicial</a>
+
+</body>
+</html>
