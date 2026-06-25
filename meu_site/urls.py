@@ -26,5 +26,5 @@ urlpatterns = [
     path('painel/', views.lista_refeicoes, name='painel'),
     path('cadastro/', views.cadastrar_usuario, name='cadastro'),
     path('adicionar/', views.adicionar_refeicao_ia, name='adicionar_ia'),
-    path('definir-metas/',views.definir_metas, name='definir'),
+    path('definir-metas/',views.definir_metas, name='definir_metas'),
 ]

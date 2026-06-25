@@ -119,12 +119,31 @@ def adicionar_refeicao_ia(request):
 
 @login_required
 def definir_metas(request):
-    # 1. BUSCA NO BANCO: Tenta achar a gaveta de metas desse usuário específico
+    # BUSCA NO BANCO: Tenta achar a gaveta de metas desse usuário específico
     try:
         meta_do_usuario = Metas.objects.get(usuario=request.user)
     # Se ele for um usuário novo e nunca definiu metas, a gaveta estará vazia
     except Metas.DoesNotExist:
         meta_do_usuario = None
-    print("")        
 
+    # SE O USUÁRIO CLICOU EM "SALVAR" (POST)
+    if request.method == 'POST':
+        # O 'instance=meta_do_usuario' avisa: "Se já existir uma meta antiga, edite ela. Se não, crie uma nova."
+        formulario = Definir_metas_form(request.POST, instance=meta_do_usuario)
+        # commit=False significa: "Segura um pouco, não salva no banco ainda!"
+        meta_salva = formulario.save(commit=False)  
+        # Avisamos ao banco de dados quem é o dono dessa meta
+        meta_salva.usuario = request.user    
+        # salva no banco de verdade!
+        meta_salva.save()
+        # mandamos uma mensagem de sucesso para a tela
+        messages.success(request, f'Metas salvas com sucesso')
+
+    # SE O USUÁRIO SÓ ABRIU A PÁGINA (GET)
+    else:
+        # Abre a prancheta limpa ou já preenchida com as metas antigas dele
+        formulario = Definir_metas_form(instance=meta_do_usuario)
+    
+    contexto = {'form': formulario}
+    return render(request, 'nutricao/definir-metas.html', contexto)
     
