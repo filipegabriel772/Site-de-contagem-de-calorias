@@ -3,6 +3,8 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.utils import timezone
 from .models import Refeicoes, Metas
 from .forms import Refeicao_ia, Definir_metas_form
 import ollama
@@ -12,12 +14,50 @@ import re
 
 @login_required
 def lista_refeicoes(request):
-    # Vai no banco de dados e pega TODOS os alimentos cadastrados
-    meus_alimentos = Refeicoes.objects.all()
-    
+    # Tenta buscar a meta do usuário logado
+    try:
+        meta_do_usuario = Metas.objects.get(usuario=request.user)
+        meta_calorias = meta_do_usuario.meta_calorias
+        meta_proteinas = meta_do_usuario.meta_proteinas
+    # Se ele for novo, a meta é None
+    except Metas.DoesNotExist:
+        meta_do_usuario = None
+        meta_calorias = 0
+        meta_proteinas = 0
+
+    hoje = timezone.now().date()
+    refeicoes_hoje = Refeicoes.objects.filter(
+        usuario = request.user,
+        data = hoje
+    )
+
+    # O Banco de dados faz a conta internamente e devolve só o número final
+    totais = refeicoes_hoje.aggregate(
+        total_cal = Sum('calorias'),
+        total_prot = Sum('proteinas')
+    )
+    # Se o usuário não comeu nada hoje, o banco devolve None. O "or 0" transforma em 0.
+    calorias_consumidas = totais['total_cal'] or 0
+    proteinas_consumidas = totais['total_prot'] or 0  
+
+    # Cálculo da barra de progresso  
+    # Evita o erro de divisão por zero caso a meta seja 0
+    pct_calorias = 0
+    if meta_calorias > 0:  
+        pct_calorias = (calorias_consumidas / meta_calorias) * 100
+
+    pct_proteinas = 0
+    if meta_proteinas > 0:
+        pct_proteinas = (proteinas_consumidas / meta_proteinas) * 100
+
     # Prepara um pacote com esses dados para mandar pro HTML
     contexto = {
-        'alimentos': meus_alimentos
+        'metas': meta_do_usuario,
+        'alimentos': refeicoes_hoje,
+        'calorias_consumidas': calorias_consumidas,
+        'proteinas_consumidas': proteinas_consumidas,
+        'pct_calorias': pct_calorias,
+        'pct_proteinas': pct_proteinas
     }
     
     # Pede para o Django renderizar (desenhar) o HTML usando esses dados
@@ -33,7 +73,7 @@ def cadastrar_usuario(request):
         # Se os dados são válidos salva no BD
         if formulario.is_valid():
             formulario.save()
-            return redirect('home') # Redireciona a página inicial
+            return redirect('painel') # Redireciona a página inicial
     
     # O usuário apenas acessou a página para ver o formulário (Método GET)
     else:
