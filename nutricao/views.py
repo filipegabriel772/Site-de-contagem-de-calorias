@@ -186,4 +186,67 @@ def definir_metas(request):
     
     contexto = {'form': formulario}
     return render(request, 'nutricao/definir-metas.html', contexto)
-    
+
+@login_required
+def historico(request):
+    print("TODAS AS REFEIÇÕES:")
+    print(
+        Refeicoes.objects.filter(usuario=request.user).values(
+            'id',
+            'descricao',
+            'data'
+        )
+    )
+
+    data_filtro = request.GET.get('data')
+
+    if data_filtro:
+        registro = Refeicoes.objects.filter(
+            usuario = request.user,
+            data=data_filtro)
+    else:
+        registro = Refeicoes.objects.none()
+
+    try:
+        meta_do_usuario = Metas.objects.get(usuario=request.user)
+        meta_calorias = meta_do_usuario.meta_calorias
+        meta_proteinas = meta_do_usuario.meta_proteinas
+    # Se ele for novo, a meta é None
+    except Metas.DoesNotExist:
+        meta_do_usuario = None
+        meta_calorias = 0
+        meta_proteinas = 0
+
+    # O Banco de dados faz a conta internamente e devolve só o número final
+    totais = registro.aggregate(
+        total_cal = Sum('calorias'),
+        total_prot = Sum('proteinas')
+    )
+    # Se o usuário não comeu nada hoje, o banco devolve None. O "or 0" transforma em 0.
+    calorias_consumidas = totais['total_cal'] or 0
+    proteinas_consumidas = totais['total_prot'] or 0  
+
+    # Cálculo da barra de progresso  
+    # Evita o erro de divisão por zero caso a meta seja 0
+    pct_calorias = 0
+    if meta_calorias > 0:  
+        pct_calorias = (calorias_consumidas / meta_calorias) * 100
+
+    pct_proteinas = 0
+    if meta_proteinas > 0:
+        pct_proteinas = (proteinas_consumidas / meta_proteinas) * 100
+
+    # Prepara um pacote com esses dados para mandar pro HTML
+    contexto = {
+        'metas': meta_do_usuario,
+        'alimentos': registro,
+        'calorias_consumidas': calorias_consumidas,
+        'proteinas_consumidas': proteinas_consumidas,
+        'pct_calorias': pct_calorias,
+        'pct_proteinas': pct_proteinas
+    }
+
+    return render(request, 'nutricao/historico.html', contexto)
+
+
+

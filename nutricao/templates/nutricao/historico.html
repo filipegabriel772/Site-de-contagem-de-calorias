@@ -1,0 +1,124 @@
+   <!DOCTYPE html>
+   <html lang="pt-br">
+   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Histórico</title>
+   </head>
+   <body>
+      <form method="GET"> {#GET pois é apenas consulta/leitura#}
+         <label for="data">Data:</label>
+         <input type="date" id="data" name="data">
+         <button type="submit">Enviar</button>
+      </form>
+      <div class="row">
+         <div class="col-md-3">
+             <div class="card text-center">
+                 <div class="card-header">
+                     Meta de calorias
+                 </div>
+                 <div class="card-body">
+                     {{metas.meta_calorias}}
+                 </div>
+             </div>
+         </div>
+         <div class="col-md-3">
+             <div class="card text-center">
+                 <div class="card-header">
+                     Meta de Proteínas
+                 </div>
+                 <div class="card-body">
+                     {{metas.meta_proteinas}}
+                 </div>
+             </div>
+         </div>
+     </div>
+ 
+     <div class="row">
+         <div class="col-md-3">
+             <div class="card text-center">
+                 <div class="card-header">
+                     Calorias consumidas
+                 </div>
+                 <div class="card-body">
+                     {{calorias_consumidas}}
+                 </div>
+             </div>
+         </div>
+         <div class="col-md-3">
+             <div class="card text-center">
+                 <div class="card-header">
+                     Proteínas consumidas
+                 </div>
+                 <div class="card-body">
+                     {{proteinas_consumidas}}
+                 </div>
+             </div>
+         </div>
+     </div>
+ 
+     <div class="mb-4">
+         <div class="d-flex justify-content-between align-items-center mb-1">
+             <span class="fw-bold text-secondary">🔥 Calorias</span>
+             <span class="text-muted">
+                 <strong class="text-dark fs-5">{{ calorias_consumidas }}</strong> / {{ metas.meta_calorias }} kcal
+             </span>
+         </div>
+         
+         <div class="progress" style="height: 22px;">
+             <div class="progress-bar bg-success fw-bold" role="progressbar" style="width: {{ pct_calorias }}%;">
+                 {{ pct_calorias }}%
+             </div>
+         </div>
+     </div>
+ 
+     <div class="mb-3">
+         <div class="d-flex justify-content-between align-items-center mb-1">
+             <span class="fw-bold text-secondary">💪 Proteínas</span>
+             <span class="text-muted">
+                 <strong class="text-dark fs-5">{{ proteinas_consumidas }}</strong> / {{ metas.meta_proteinas }} g
+             </span>
+         </div>
+         
+         <div class="progress" style="height: 22px;">
+             <div class="progress-bar bg-info text-dark fw-bold" role="progressbar" style="width: {{ pct_proteinas }}%;">
+                 {{ pct_proteinas }}%
+             </div>
+         </div>
+     </div>
+
+     <h1>Refeições econtradas</h1>
+     <div class="table-responsive">
+     <table class="table table-striped table-hover">
+         <thead>
+             <tr>
+                 <th>Descrição</th>
+                 <th>Calorias</th>
+                 <th>Proteínas</th>
+             </tr>
+         </thead>
+     
+         <tbody>
+             {% for item in alimentos %}
+             <tr>
+                 <td>{{ item.descricao }}</td>
+                 <td>{{ item.calorias }} Kcal</td>
+                 <td>{{ item.proteinas }} g</td>
+             </tr>
+             {% empty %}
+             <tr>
+                 <td colspan="3">Nenhum alimento encontrado</td>
+             </tr>
+             {% endfor %}
+         </tbody>
+     </table>
+     </div>
+ 
+     <a href="{% url 'painel' %}" class="btn btn-danger">
+         Voltar
+     </a>
+
+
+   </body>
+   </html>

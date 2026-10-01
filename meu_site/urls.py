@@ -27,4 +27,5 @@ urlpatterns = [
     path('cadastro/', views.cadastrar_usuario, name='cadastro'),
     path('adicionar/', views.adicionar_refeicao_ia, name='adicionar_ia'),
     path('definir-metas/',views.definir_metas, name='definir_metas'),
+    path('historico/', views.historico, name="historico")
 ]
